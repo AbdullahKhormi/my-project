@@ -1,0 +1,20 @@
+{
+  "kind": "collectionType",
+  "collectionName": "events",
+  "info": {
+    "singularName": "event",
+    "pluralName": "events",
+    "displayName": "events"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "nameEvent": {
+      "type": "string"
+    },
+    "dateEvent": {
+      "type": "datetime"
+    }
+  }
+}
