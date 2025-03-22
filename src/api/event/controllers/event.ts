@@ -1,43 +1,61 @@
 import { factories } from '@strapi/strapi';
 
 export default factories.createCoreController('api::event.event', ({ strapi }) => ({
-  // دالة العثور على منشور واحد
   async findOne(ctx) {
     const { id } = ctx.params;
-    const entity = await strapi.db.query('api::event.event').findOne({
-      where: { id },
-    });
 
-    if (!entity) {
-      return ctx.notFound('event not found');
+    // التأكد من وجود userId في الـ JWT
+    const userId = ctx.state.user ? ctx.state.user.id : null;
+    if (!userId) {
+      return ctx.unauthorized('You are not authenticated');
     }
 
+    // البحث عن الحدث بناءً على الـ id و userId
+    const entity = await strapi.db.query('api::event.event').findOne({
+      where: {
+        id,
+         // التأكد من أن الحدث ينتمي للمستخدم الحالي
+      },
+      populate: ['user'],  // إذا كنت بحاجة لربط بيانات المستخدم بالحدث
+    });
+
+    // في حالة عدم العثور على الحدث أو أن المستخدم ليس لديه صلاحية للوصول إليه
+    if (!entity) {
+      return ctx.notFound('Event not found or you are not authorized to access this event');
+    }
+
+    // إرجاع النتيجة بعد تحويلها
     return this.transformResponse(entity);
-  },
+  }
+,
 
   // دالة التحديث
   async update(ctx) {
     const { id } = ctx.params;
 
-    // تأكد من أن العنصر موجود
+    // الحصول على userId من الـ JWT
+    const userId = ctx.state.user.id;
+
+    // تحقق من وجود الحدث للمستخدم الحالي
     const entity = await strapi.db.query('api::event.event').findOne({
-      where: { id },
+      where: {
+        id,
+        user: userId,  // تأكد من أن الحدث ينتمي للمستخدم الحالي
+      },
     });
 
     if (!entity) {
-      return ctx.notFound('event not found');
+      return ctx.notFound('Event not found or you are not authorized to update this event');
     }
 
-    // هنا يمكنك تحديد البيانات التي سيتم تحديثها
+    // تحديث البيانات
     const updatedData = ctx.request.body.data;
 
-    // تحديث الكائن
     const updatedEntity = await strapi.db.query('api::event.event').update({
       where: { id },
       data: updatedData,
     });
 
-    // إرجاع الكائن المحدث
     return this.transformResponse(updatedEntity);
   },
 
@@ -55,12 +73,12 @@ export default factories.createCoreController('api::event.event', ({ strapi }) =
     });
 
     if (!entity) {
-      return ctx.notFound('event not found');
+      return ctx.notFound('Post not found');
     }
 
     try {
       // تسجيل قبل تنفيذ الحذف
-      console.log(`Attempting to delete event with ID: ${id}`);
+      console.log(`Attempting to delete post with ID: ${id}`);
 
       // تنفيذ عملية الحذف
       await strapi.db.query('api::event.event').delete({
@@ -68,11 +86,11 @@ export default factories.createCoreController('api::event.event', ({ strapi }) =
       });
 
       // تسجيل بعد تنفيذ الحذف
-      console.log(`event with ID: ${id} has been deleted`);
+      console.log(`Post with ID: ${id} has been deleted`);
 
     } catch (error) {
       console.error("Error during delete:", error);
-      return ctx.internalServerError('Error deleting event');
+      return ctx.internalServerError('Error deleting post');
     }
 
     return ctx.noContent(); // الحذف تم بنجاح

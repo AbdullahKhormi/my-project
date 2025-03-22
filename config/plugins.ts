@@ -1,18 +1,13 @@
-export default ({ env }: { env: (key: string) => string }) => ({
+module.exports = {
   email: {
-    provider: 'smtp',
+    provider: 'mailgun',
     providerOptions: {
-      host: 'smtp.office365.com',
-      port: 587,
-      secure: false, // Use false for TLS
-      auth: {
-        user: env('akhormi.1@outlook.com'), // your Outlook email
-        pass: env('Ab11223344@@'), // your Outlook password or app-specific password if 2FA is enabled
-      },
+      apiKey: '3d4b3a2a-bec00853', // API Key الخاص بك
+      domain: 'sandbox35dbffc3835b4c578b21c7db126a96f3.mailgun.org', // النطاق الخاص بك
     },
     settings: {
-      defaultFrom: 'akhormi.1@outlook.com', // Your Outlook email
-      defaultReplyTo: 'akhormi.1@outlook.com',
+      defaultFrom: 'abady112009@gmail.com', // البريد الإلكتروني الافتراضي الذي سيتم إرسال الرسائل منه
+      defaultReplyTo: 'abady112009@gmail.com', // البريد الإلكتروني الذي سيتم الرد عليه
     },
   },
-});
+};
